@@ -16,5 +16,19 @@ read_fitbit_folder <- function(folder_name){
   data <- lapply(paste(folder_name, file_names, sep = "/"), read.csv) %>%
     do.call("rbind", .)
   
+  
+  
+  
   return(data)
 }
+
+read_floor_folder<-function(){
+  data<-read_fitbit_folder ("Data/floors")
+  data<-select(data,date,time,value) %>%
+    rename(floors=value)
+}
+
+
+
+
+
