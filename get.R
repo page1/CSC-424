@@ -26,3 +26,11 @@ get_distance <- function(){
   
     return(data)
 }
+
+get_calories <- function(){
+  data <- read_fitbit_folder("Data/calories")
+  data <- select(data, date, time, value) %>%
+    rename(calories = value)
+  
+  return(data)
+}
