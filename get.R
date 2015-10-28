@@ -20,7 +20,7 @@ read_fitbit_folder <- function(folder_name){
  return(data)
 }
 
-read_floor_folder<-function(){
+get_floors <- function(){
   data<-read_fitbit_folder ("Data/floors")
   data<-select(data,date,time,value) %>%
     rename(floors=value)
@@ -40,6 +40,22 @@ get_calories <- function(){
   data <- read_fitbit_folder("Data/calories")
   data <- select(data, date, time, value) %>%
     rename(calories = value)
+  
+  return(data)
+}
+
+get_steps <- function(){
+  data <- read_fitbit_folder("Data/steps")
+  data <- select(data, date, time, value) %>%
+    rename(steps = value)
+  
+  return(data)
+}
+
+get_elevation <- function(){
+  data <- read_fitbit_folder("Data/elevation")
+  data <- select(data, date, time, value) %>%
+    rename(elevation = value)
   
   return(data)
 }
