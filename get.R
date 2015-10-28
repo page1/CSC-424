@@ -2,7 +2,7 @@
 library(dplyr)
 
 get_omnipod_data <- function(){
-  data <- read.csv("Data/OmniPod.csv", stringsAsFactors = F)
+  data <- read.csv("Data/OmniPod.csv")
   
   return(data)
 }
@@ -14,7 +14,7 @@ get_dexcom <- function(){
 
 read_fitbit_folder <- function(folder_name){
   file_names <- list.files(folder_name)
-  data <- lapply(paste(folder_name, file_names, sep = "/"), read.csv, stringsAsFactors = F) %>%
+  data <- lapply(paste(folder_name, file_names, sep = "/"), read.csv) %>%
     do.call("rbind", .)
   
  return(data)
