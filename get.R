@@ -19,6 +19,14 @@ read_fitbit_folder <- function(folder_name){
   return(data)
 }
 
+get_distance <- function(){
+  data <- read_fitbit_folder("Data/distance")
+  data <- select(data, date, time, value) %>%
+    rename(distance = value)
+  
+    return(data)
+}
+
 get_calories <- function(){
   data <- read_fitbit_folder("Data/calories")
   data <- select(data, date, time, value) %>%
