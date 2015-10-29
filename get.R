@@ -8,8 +8,12 @@ get_omnipod_data <- function(){
 }
 
 get_dexcom <- function(){
-  data1 <- read.table("data/Dexcom 1.Export.txt", fill = T, header = T)
-  data2 <- read.table("data/Dexcom 2.Export.txt", fill = T, header = T)
+  data1 <- read.table("Data/Dexcom 1.Export.txt", header = TRUE, sep="\t")
+  data2 <- read.table("Data/Dexcom 2.Export.txt", header = TRUE, sep = "\t")
+  
+  dexcom_total <- rbind(data1, data2)
+  
+  return(dexcom_total)
 }
 
 read_fitbit_folder <- function(folder_name){
@@ -21,8 +25,8 @@ read_fitbit_folder <- function(folder_name){
 }
 
 get_floors <- function(){
-  data<-read_fitbit_folder ("Data/floors")
-  data<-select(data,date,time,value) %>%
+  data <- read_fitbit_folder ("Data/floors")
+  data <- select(data, date, time, value) %>%
     rename(floors=value)
   
   return(data)

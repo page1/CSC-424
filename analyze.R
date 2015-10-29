@@ -14,3 +14,4 @@ plot_omnipod_type_frequency <- function(data){
   
   print(plot)
 }
+
