@@ -47,7 +47,7 @@ munge_omni_pod <- function(omni_pod){
     select(-hidden) %>%
     filter(!(type %in% c("Pump Alarm", "State Of Health", "Notes"))) %>%
     split_units() %>%
-    mutate(date = as.Date(date, format = "%m/%d/%Y"),
+    mutate(date = as.Date(date, format = "%m/%d/%y"),
            value = as.numeric(value)) %>%
     mutate(extend_amount = ifelse(grepl("Bolus-Extended Meal Bolus - ", description, fixed = T), value, 0),
            extend_time = ifelse(grepl("Bolus-Extended Meal Bolus - ", description, fixed = T), gsub(" minutes.", "", gsub("Bolus-Extended Meal Bolus - ", "", description)), 0),
