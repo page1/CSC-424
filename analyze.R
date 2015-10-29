@@ -37,3 +37,4 @@ corrplot_fitbit <- function(fitbit){
   corrplot(cor(select(fitbit, -date, -time)))
   par(old)
 }
+
