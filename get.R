@@ -2,27 +2,31 @@
 library(dplyr)
 
 get_omnipod_data <- function(){
-  data <- read.csv("Data/OmniPod.csv")
+  data <- read.csv("Data/OmniPod.csv", stringsAsFactors = F)
   
   return(data)
 }
 
 get_dexcom <- function(){
-  data1 <- read.table("data/Dexcom 1.Export.txt", fill = T, header = T)
-  data2 <- read.table("data/Dexcom 2.Export.txt", fill = T, header = T)
+  data1 <- read.table("Data/Dexcom 1.Export.txt", header = TRUE, sep="\t")
+  data2 <- read.table("Data/Dexcom 2.Export.txt", header = TRUE, sep = "\t")
+  
+  dexcom_total <- rbind(data1, data2)
+  
+  return(dexcom_total)
 }
 
 read_fitbit_folder <- function(folder_name){
   file_names <- list.files(folder_name)
-  data <- lapply(paste(folder_name, file_names, sep = "/"), read.csv) %>%
+  data <- lapply(paste(folder_name, file_names, sep = "/"), read.csv, stringsAsFactors = F) %>%
     do.call("rbind", .)
   
  return(data)
 }
 
 get_floors <- function(){
-  data<-read_fitbit_folder ("Data/floors")
-  data<-select(data,date,time,value) %>%
+  data <- read_fitbit_folder ("Data/floors")
+  data <- select(data, date, time, value) %>%
     rename(floors=value)
   
   return(data)
