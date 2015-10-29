@@ -3,7 +3,6 @@ source("get.R")
 source("munge.R")
 source("analyze.R")
 
-library(ggplot2)
 library(dplyr)
 
 # Get Data
@@ -15,13 +14,16 @@ steps <- get_steps()
 elevation <- get_elevation()
 
 # Mutate Data
-omni_pod <- column_names_to_lower_case(omni_pod)
+omni_pod <- munge_omni_pod(omni_pod)
 
 fitbit <- join_fitbit_data(floors, distance, calories, steps, elevation)
 
 # Analyse Data
 
 plot_omnipod_type_frequency(omni_pod)
+hist_bolus(omni_pod)
+hist_fitbit(fitbit)
+corrplot_fitbit(fitbit)
 
 
 
