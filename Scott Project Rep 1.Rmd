@@ -1,0 +1,56 @@
+---
+title: "Scott Part 1"
+author: "Scott Page"
+date: "October 28, 2015"
+output: html_document
+---
+
+This document contains overview analysis of many of the fields of our projects data set.
+
+```{r echo = F, warning = F}
+source("get.R")
+source("munge.R")
+source("analyze.R")
+
+library(dplyr)
+
+# Get Data
+omni_pod <- get_omnipod_data()
+floors <- get_floors()
+distance <- get_distance()
+calories <- get_calories()
+steps <- get_steps()
+elevation <- get_elevation()
+
+# Mutate Data
+omni_pod <- munge_omni_pod(omni_pod)
+
+fitbit <- join_fitbit_data(floors, distance, calories, steps, elevation)
+
+# Analyse Data
+```
+
+```{r echo = F}
+plot_omnipod_type_frequency(omni_pod)
+```
+```{r echo = F}
+hist_bolus(omni_pod)
+```
+```{r echo = F}
+  hist(fitbit$floors, xlab = "Floors", main = "Hist of Fitbit Floors")
+```
+```{r echo = F}
+  hist(fitbit$distance, xlab = "Distance", main = "Hist of Fitbit Distance")
+```
+```{r echo = F}
+  hist(fitbit$calories, xlab = "Calories", main = "Hist of Fitbit Calories")
+```
+```{r echo = F}
+  hist(fitbit$steps, xlab = "Steps", main = "Hist of Fitbit Steps")
+```
+```{r echo = F}
+  hist(fitbit$elevation, xlab = "Elevation", main = "Hist of Fitbit Elevation")
+```
+```{r echo = F, warning = F}
+corrplot_fitbit(fitbit)
+```
