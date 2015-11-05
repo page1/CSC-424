@@ -8,8 +8,8 @@ get_omnipod_data <- function(){
 }
 
 get_dexcom <- function(){
-  data1 <- read.table("Data/Dexcom 1.Export.txt", header = TRUE, sep="\t")
-  data2 <- read.table("Data/Dexcom 2.Export.txt", header = TRUE, sep = "\t")
+  data1 <- read.table("Data/Dexcom 1.Export.txt", header = TRUE, sep="\t", stringsAsFactors = F)
+  data2 <- read.table("Data/Dexcom 2.Export.txt", header = TRUE, sep = "\t", stringsAsFactors = F)
   
   dexcom_total <- rbind(data1, data2)
   
