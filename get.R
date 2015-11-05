@@ -25,7 +25,7 @@ read_fitbit_folder <- function(folder_name){
 }
 
 get_floors <- function(){
-  data <- read_fitbit_folder ("Data/floors")
+  data <- read_fitbit_folder("Data/floors")
   data <- select(data, date, time, value) %>%
     rename(floors=value)
   

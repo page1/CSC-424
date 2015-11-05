@@ -23,7 +23,12 @@ fitbit <- munge_fitbit(fitbit)
 
 fitbit_dexcom <- join_fitbit_with_dexcom_predictions(fitbit, dexcom)
 
+insulin_bg_and_fitness <- munge_insulin_bg_fitness(fitbit_dexcom, omni_pod, burn_rate = 0.98)
 
+data_plus_fields <- add_rolling_stats(insulin_bg_and_fitness) %>%
+  add_categorical_fields()
+
+write.csv(data_plus_fields, file = "data_set.csv")
 
 # Analyse Data
 
@@ -32,5 +37,7 @@ hist_bolus(omni_pod)
 hist_fitbit(fitbit)
 corrplot_fitbit(fitbit)
 
+dd <- lm(predicted_bg_lead_1hour ~ predicted_bg + acting_carbs + total_insulin_burndown +  steps_sum_next_1hour, data = data_plus_fields)
+summary(dd)
 
 
