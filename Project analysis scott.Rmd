@@ -1,0 +1,135 @@
+---
+title: "Project Analysis Scott"
+author: "Scott Page"
+date: "November 10, 2015"
+output: html_document
+---
+
+# Exploratory Analysis
+```{r, include = F}
+library(tidyr)
+library(dplyr)
+library(lubridate)
+library(tools)
+library(ggplot2)
+library(corrplot)
+```
+```{r echo = F}
+data <- read.csv("data_set.csv", stringsAsFactors = F) %>%
+    select(-X) %>%
+    mutate(datetime = ymd_hms(datetime)) %>%
+    rename(basal_delivery = basal_delievery)
+```
+
+The diabetes data set we analysed was a combined case study of several data sources including:
+
+* Fitbit Data
+    * Steps
+    * Floors
+    * Calories
+    * Elevation
+* Continuous Glucose Monitor (CGM)
+    * Approximate blood sugar level
+* Insulin Pump
+    * Basal insulin delivery
+    * Bolus insulin delivery
+    * Carb intake
+
+These data sets were aggregated & merged to form a single large data set containing `r round(max(data$datetime) - min(data$datetime))` days worth of information represented by `r nrow(data)` rows and `r ncol(data)` columns. 
+
+## Column Names
+```{r, echo = F}
+print(colnames(data))
+```
+
+### Base Column Taxonimy:
+
+* datetime - Data was sampled every 5 minutes
+* basal_insulin_hourly_rate - Establishes the # of units of insulin that will be delivered over the next hours.
+* glucose - value used by the insulin pump to estimate bolus insulin requirements
+* meal_approx_carbs - estimate of the number of carbs that will be eaten
+* basal_delivery - number of units of insulin delivered during that 5 minute time period
+* bolus_burndown - Approximation of insulin currently in body as a result of bolus insulin delivery. This approximation is based on a 2% per 5 minute burn rate. AKA the value decreases every 5 minutes by 2% unless a new round of insulin is applied
+* total_insulin_burndown - Cumulative approximate insulin in body when accounting for both basal & bolus doses.
+* acting_carbs - Approximation of carbs currently active in body. The same burn down patter of 2% per 5 minutes was applied to carb intake & insulin burndown.
+* predicted_bg - The CGM's predicted Blood Glucose Level
+* floors - Fitbit data approximate denoting floors ascended in past 5 minutes
+* distance - Fitbit data approximate mile traveled in past 5 minutes
+* calories - Fitbit data approximate calories burned in past 5 minutes
+* steps - Fitbit data approximate steps walked in past 5 minutes
+* elevation - Fitbit data approximating elevation change. Only available sporadically.
+
+### Derived Temporal Columns
+* Lead - Columns named with "Lead" are samples from N hours in the future.
+* Lag - Columns named with "Lag" are samples from N hours in the past.
+* Past - Columns named with "Past" are sums of the activity performed over the N hours leading up to the current time.
+* Next - Columns named with "Next" are sums of activity performed over the next N hours following the current time.
+
+### Derived Categorical Columns
+* high_bg - Boolean flag if BG is over 180
+* low_bg - Boolean flag if BG is under 70
+* in_range - Boolean flag if BG is between 70 & 180
+* after_noon - Boolean flag if time stamp is PM
+* dawn_phenomenon - Boolean flag if time stamp is between 2 & 8AM
+
+# How does the base data vary?
+
+```{r, echo = F}
+data_without_date <- select(data, basal_delivery, bolus_burndown, total_insulin_burndown, acting_carbs, predicted_bg, floors, distance, calories, steps, elevation)
+
+for(colname in colnames(data_without_date)){
+  numeric_data <- as.numeric(data_without_date[, which(colnames(data_without_date) == colname) ])
+  
+  name <- gsub("_", " ", colname) %>% toTitleCase()
+  hist(numeric_data, main = paste("Histogram Of", name), xlab = name)
+}
+```
+
+# How does insulin delivered vary with carbs
+```{r echo = F}
+insulin_vs_carbs <- data[complete.cases(select(data, bolus_insulin_units, glucose, meal_approx_carbs)),]
+
+ggplot(aes(x = meal_approx_carbs, y = bolus_insulin_units, colour = glucose), data = insulin_vs_carbs) +
+  geom_point() +
+  xlab("Approximate Carbs Ingested") +
+  ylab("Bolus Insulin Delivered") +
+  ggtitle("Insulin Delievery Vs Carbs Ingested & Glucose Level")
+```
+
+Here we can see that insulin delivery increases in general when more carbs are going to be ingested. This makes sense since carbs drive up blood sugar, while insulin drives down blood sugar and the goal is to keep BG in range. 
+
+Also note the significant number of data points with no carbs ingested, yet insulin being delivered. Many of these have lighter coloring representing higher current BG levels. This means the insulin is being delivered to correct for a higher BG episode.
+
+# How does blood sugar change 1 hour after insulin delievery
+```{r echo = F, warning=F}
+insulin_vs_carbs <- insulin_vs_carbs %>%
+  mutate(bg_1_hour_delta = predicted_bg_lead_1hour - predicted_bg,
+         bg_2_hour_delta = predicted_bg_lead_2hour - predicted_bg,
+         bg_3_hour_delta = predicted_bg_lead_3hour - predicted_bg,
+         bg_4_hour_delta = predicted_bg_lead_4hour - predicted_bg,
+         bg_5_hour_delta = predicted_bg_lead_5hour - predicted_bg)
+
+ggplot(aes(x = bolus_insulin_units, y = bg_1_hour_delta), data = insulin_vs_carbs) +
+  geom_point() +
+  xlab("Bolus Insulin Delivered") +
+  ylab("1 Hour BG Delta") +
+  ggtitle("Insulin Delievery Vs BG Delta")
+```
+
+We can see that generally, the 1 hour change in BG vs bolus delivery isn't strikingly trendy. This is good since the goal of the diabetic is to maintain levels.
+
+```{r echo = F}
+hist(insulin_vs_carbs$bg_1_hour_delta,
+     main = "1 Hour Change in BG after Insulin Delievery",
+     xlab = "1 Hour Change in BG")
+```
+
+Based on this histogram we can see that in general the BG does decrease 1 hour after insulin delivery.
+
+# Correlations
+```{r echo = F}
+insulin_bg <- select(insulin_vs_carbs, bolus_insulin_units, glucose, meal_approx_carbs, bg_1_hour_delta, acting_carbs, total_insulin_burndown, predicted_bg_lead_1hour)
+
+insulin_bg <- insulin_bg[complete.cases(insulin_bg),]
+corrplot(cor(insulin_bg), order='hclust')
+```
